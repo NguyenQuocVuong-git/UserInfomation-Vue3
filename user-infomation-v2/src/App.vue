@@ -1,11 +1,18 @@
+<template>
+  <div id="app">
+    <CreateUser />
+  </div>
+</template>
 <script>
-import HeaderUser from "../src/components/Header.vue";
-import TableUser from "../src/components/Table.vue";
+// import HeaderUser from "../src/components/Header.vue";
+// import TableUser from "../src/components/Table.vue";
+import CreateUser from "../src/components/Create.vue";
 export default {
   name: "App",
   components: {
-    HeaderUser,
-    TableUser,
+    CreateUser,
+    // HeaderUser,
+    // TableUser,
   },
 };
 </script>
