@@ -8,11 +8,10 @@ const input = ref('');
 const store = useStore();
 
 const isYourMessage = (message) => {
-  return message.from === this.user.socketId;
+  return message.from === user.value.socketId;
 }
 
 const send = () => {
-  console.log(input)
   if (!input.value.length) return;
   const message = {
     content: input.value,
@@ -30,8 +29,7 @@ const user = computed(() => {
 const friends = computed(() => store.getters.friends);
 
 const  setId = (value) => {
- console.log("🚀 ~ file: Home.vue:34 ~ setId ~ value:", value)
- 
+ selectedFriend.value = value
 }
 
 const messages = computed(() => {

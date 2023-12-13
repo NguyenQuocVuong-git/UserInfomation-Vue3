@@ -16,7 +16,6 @@ const form = ref({
 });
 
 const login = () => {
-    console.log('voday')
     const { username } = form.value;
     if (!username.length) return;
     socket.auth = { username };

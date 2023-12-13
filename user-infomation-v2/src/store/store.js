@@ -41,7 +41,6 @@ const store = createStore({
   },
   actions: {
     LOGIN({ commit }, user) {
-      console.log("🚀 ~ file: store.js:16 ~ LOGIN ~ user:", user)
       commit("setUser", user);
     },
     SET_FRIENDS({ commit }, friends) {
