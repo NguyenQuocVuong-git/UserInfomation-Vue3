@@ -2,8 +2,7 @@
   <div class="card container">
     <div class="dialog-container" @click.stop>
       <div class="row">
-        <h1 v-if="creatAccount">Please fill in the information below</h1>
-        <h1 v-if="!creatAccount">Log in information</h1>
+        <h1>Please fill in the information below</h1>
         <h5 v-if="err" style="color: red">{{ errCreate }}</h5>
         <div class="input">
           <label for="email" class="lable">Email: </label>
@@ -13,7 +12,7 @@
           <label for="password" class="lable">PassWord: </label>
           <input id="password" type="password" v-model="password" />
         </div>
-        <div class="input" v-if="creatAccount">
+        <div class="input">
           <label for="passwordConfirm" class="lable">PassWordConfirm</label>
           <input
             id="passwordConfirm"
@@ -21,68 +20,61 @@
             v-model="passwordConfirm"
           />
         </div>
-        <div class="input" v-if="creatAccount">
+        <div class="input">
           <label for="name" class="lable">Name: </label>
           <input id="name" v-model="name" />
         </div>
-        <div class="input" v-if="creatAccount">
+        <div class="input">
           <label for="age" class="lable">Age: </label>
           <input id="age" v-model="age" />
         </div>
-        <div class="input" v-if="creatAccount">
+        <div class="input">
           <label for="phone" class="lable">Phone: </label>
           <input id="phone" v-model="phone" />
         </div>
       </div>
-      <button
-        @click="
-          createAccount();
-          creatAccount = true;
-        "
-      >
-        Create An Account
-      </button>
-      <button
-        @click="
-          login();
-          creatAccount = false;
-        "
-      >
-        Login
+      <button @click="createAccount()">Create An Account</button>
+      <button>
+        <router-link :to="{ name: 'login' }">Back to login</router-link>
       </button>
     </div>
   </div>
 </template>
 <script setup>
-import axios from "@/axios"
+import axios from "@/axios";
 import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+const route = useRoute();
+const router = useRouter();
 const email = ref("");
 const password = ref("");
 const passwordConfirm = ref("");
 const name = ref("");
 const age = ref("");
 const phone = ref("");
-const creatAccount = ref(false);
-const errCreate = ref('')
-const err = ref(false)
+const errCreate = ref("");
+const err = ref(false);
 
 const createAccount = async () => {
-  await axios.post("user/createUser",{
-    email: email.value,
-    password: password.value,
-    passwordConfirm: passwordConfirm.value,
-    name: name.value,
-    age: parseInt(age.value),
-    phone: phone.value,
-  }).then(()=>{
-
-  }).catch((error)=>{
-    err.value= true,
-    errCreate.value = error.response.data.err
+  await axios
+    .post("user/createUser", {
+      email: email.value,
+      password: password.value,
+      passwordConfirm: passwordConfirm.value,
+      name: name.value,
+      age: parseInt(age.value),
+      phone: phone.value,
     })
-};
-const login = () => {
-  err.value= false;
+    .then(() => {
+      err.value = true;
+      errCreate.value = "Create Account Succsessfully"
+      setTimeout(()=>{
+        return router.replace(route.query.to ? String(route.query.to) : "/login");
+      }, 2000)
+    })
+    .catch((error) => {
+      err.value = true, errCreate.value = error.response.data.err;
+    });
 };
 </script>
 <script>

@@ -17,14 +17,14 @@
           <td>{{ person.email }}</td>
           <td>{{ person.phone }}</td>
           <td>
-            <button
+            <!-- <button
               @click="
                 show = !show;
                 iform = person;
               "
             >
               Update
-            </button>
+            </button> -->
             <button>
               <a
                 href="javascript:;"
@@ -34,7 +34,7 @@
             </button>
           </td>
         </tr>
-        <UpdateUser v-model:active="show" :data-edit="iform" />
+        <!-- <UpdateUser v-model:active="show" :data-edit="iform" /> -->
       </tbody>
     </table>
   </div>
@@ -43,9 +43,9 @@
 <script setup>
 import { ref } from "vue";
 import axios from "@/axios";
-import UpdateUser from "@/diaglog/UpdateUser.vue";
-const show = ref(false);
-const iform = ref();
+// import UpdateUser from "@/diaglog/UpdateUser.vue";
+// const show = ref(false);
+// const iform = ref();
 const people = ref([
   {
     name: "John Doe",
@@ -85,7 +85,12 @@ const deleteUser = async (email, index) => {
   }
 };
 </script>
-
+  
+<script>
+export default {
+  name: 'TableUser',
+}
+</script>
 <style>
 .table-wrapper {
   display: flex;
