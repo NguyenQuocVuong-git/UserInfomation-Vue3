@@ -1,13 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '../pages/Login.vue';
-import Home from '../pages/Home.vue';
-import store from '@/store/store';
+// import Home from '../pages/Home.vue';
+// import store from '@/store/store';
+import WebSocket from '../pages/WebSocketChat.vue';
 
 const routes = [
   {
     name: "Home",
     path: "/",
-    component: Home,
+    component: WebSocket,
   },
   {
     name: "Login",
@@ -21,10 +22,10 @@ const router = createRouter({
   routes: routes,
 });
 
-router.beforeEach((to, from, next) => {
-  if (to.name !== "Login" && !store.state.user) next({ name: "Login" });
-  else if (to.name === "Login" && store.state.user) next({ name: "Home" });
-  else next();
-});
+// router.beforeEach((to, from, next) => {
+//   if (to.name !== "Login" && !store.state.user) next({ name: "Login" });
+//   else if (to.name === "Login" && store.state.user) next({ name: "Home" });
+//   else next();
+// });
 
 export default router;
