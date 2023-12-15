@@ -1,3 +1,9 @@
+<template>
+  <div>
+    <HeaderUser/>
+    <TableUser/>
+  </div>
+</template>
 <script>
 import HeaderUser from "../src/components/Header.vue";
 import TableUser from "../src/components/Table.vue";
