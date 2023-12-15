@@ -1,130 +1,150 @@
 <template>
-  <div class="card container">
-    <div class="dialog-container" @click.stop>
-      <div class="row">
-        <h1>Please fill in the information below</h1>
-        <h5 v-if="err" style="color: red">{{ errCreate }}</h5>
-        <div class="input">
-          <label for="email" class="lable">Email: </label>
-          <input id="email" v-model="email" />
-        </div>
-        <div class="input">
-          <label for="password" class="lable">PassWord: </label>
-          <input id="password" type="password" v-model="password" />
-        </div>
-        <div class="input">
-          <label for="passwordConfirm" class="lable">PassWordConfirm</label>
-          <input
-            id="passwordConfirm"
-            type="password"
-            v-model="passwordConfirm"
-          />
-        </div>
-        <div class="input">
-          <label for="name" class="lable">Name: </label>
-          <input id="name" v-model="name" />
-        </div>
-        <div class="input">
-          <label for="age" class="lable">Age: </label>
-          <input id="age" v-model="age" />
-        </div>
-        <div class="input">
-          <label for="phone" class="lable">Phone: </label>
-          <input id="phone" v-model="phone" />
-        </div>
-      </div>
-      <button @click="createAccount()">Create An Account</button>
-      <button>
-        <router-link :to="{ name: 'login' }">Back to login</router-link>
-      </button>
-    </div>
-  </div>
+  <v-main class="main">
+    <v-form ref="refVForm" @submit.prevent="onSubmit">
+      <v-container>
+        <v-row justify="center">
+          <h1>Please fill in the information below</h1>
+          <v-col cols="12" sm="8" md="6">
+            <h5 v-if="statusCreate" style="color: red">
+              {{ statusCreateValue }}
+            </h5>
+            <v-text-field
+              v-model="form.email"
+              label="Username or email"
+              placeholder="Username or email"
+              :rules="[requiredValidator, emailValidator]"
+              required
+              outlined
+            ></v-text-field>
+            <v-text-field
+              v-model="form.password"
+              label="PassWord"
+              placeholder="PassWord"
+              :rules="[requiredValidator, passwordValidator]"
+              required
+              outlined
+            ></v-text-field>
+            <v-text-field
+              v-model="form.passwordConfirm"
+              label="PassWord Confirm"
+              placeholder="PassWord Confirm"
+              :rules="[
+                requiredValidator,
+                passwordValidator,
+                confirmedValidator(form.passwordConfirm, form.password),
+              ]"
+              required
+              outlined
+            ></v-text-field>
+            <v-text-field
+              v-model="form.name"
+              label="Name"
+              placeholder="Name"
+              :rules="[requiredValidator, nameValidator]"
+              required
+              outlined
+            ></v-text-field>
+            <v-text-field
+              v-model="form.age"
+              label="Age"
+              placeholder="Age"
+              :rules="[requiredValidator, numberValidator]"
+              required
+              outlined
+            ></v-text-field>
+            <v-text-field
+              v-model="form.phone"
+              label="Phone"
+              placeholder="Phone"
+              :rules="[requiredValidator, phoneValidator]"
+              required
+              outlined
+            ></v-text-field>
+          </v-col>
+        </v-row>
+        <v-row justify="center">
+          <v-btn color="primary" type="submit" elevation="2" large
+            >Create Account</v-btn
+          >
+          <v-btn color="primary" type="submit" elevation="2" large>
+            <router-link :to="{ name: 'login' }">Back to login</router-link>
+          </v-btn>
+        </v-row>
+      </v-container>
+    </v-form>
+  </v-main>
 </template>
 <script setup>
 import axios from "@/axios";
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import socket from "@/socket/socket";
+import { useStore } from "vuex";
+import {
+  requiredValidator,
+  emailValidator,
+  passwordValidator,
+  confirmedValidator,
+  nameValidator,
+  numberValidator,
+  phoneValidator,
+} from "../utils/validators";
 const route = useRoute();
 const router = useRouter();
-const email = ref("");
-const password = ref("");
-const passwordConfirm = ref("");
-const name = ref("");
-const age = ref("");
-const phone = ref("");
-const errCreate = ref("");
-const err = ref(false);
+const store = useStore();
+const statusCreateValue = ref("");
+const statusCreate = ref(false);
+const refVForm = ref();
+const form = ref({
+  email: "",
+  password: "",
+  passwordConfirm: "",
+  name: "",
+  age: "",
+  phone: "",
+});
 
 const createAccount = async () => {
+  statusCreate.value = true;
+  console.log(form.value)
   await axios
     .post("user/createUser", {
-      email: email.value,
-      password: password.value,
-      passwordConfirm: passwordConfirm.value,
-      name: name.value,
-      age: parseInt(age.value),
-      phone: phone.value,
+      email: form.value.email,
+      password: form.value.password,
+      passwordConfirm: form.value.passwordConfirm,
+      name: form.value.name,
+      age: parseInt(form.value.age),
+      phone: form.value.phone,
     })
-    .then(() => {
-      err.value = true;
-      errCreate.value = "Create Account Succsessfully"
-      setTimeout(()=>{
-        return router.replace(route.query.to ? String(route.query.to) : "/login");
-      }, 2000)
+    .then((res) => {
+      store.dispatch("LOGIN", res.data.userLogin);
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", res.data.userLogin);
+      socket.auth = { username: res.data.userLogin.email };
+      socket.connect();
+      statusCreateValue.value = "Create Account Succsessfully";
+      setTimeout(() => {
+        return router.replace(route.query.to ? String(route.query.to) : "/");
+      }, 2000);
     })
     .catch((error) => {
-      err.value = true, errCreate.value = error.response.data.err;
+      statusCreateValue.value = error.response.data.err;
     });
 };
-</script>
-<script>
-export default {
-  name: "CreateUser",
+const onSubmit = () => {
+  refVForm.value?.validate().then(({ valid: isValid }) => {
+    if (isValid) {
+      createAccount();
+    }
+  });
 };
 </script>
+
 <style scoped>
-.dialog-backdrop {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.dialog-container {
-  max-width: 400px;
-  box-shadow: 0 11px 15px -7px rgba(0, 0, 0, 0.2),
-    0 24px 38px 3px rgba(0, 0, 0, 0.14), 0 9px 46px 8px rgba(0, 0, 0, 0.12);
-  margin-top: 30px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 15px;
-  background-color: #fff;
-}
-
-.dialog-enter-active,
-.dialog-leave-active {
-  transition: opacity 0.2s;
-}
-.dialog-enter,
-.dialog-leave-to {
-  opacity: 0;
-}
-
-.dialog-enter-active .dialog-container,
-.dialog-leave-active .dialog-container {
-  transition: transform 0.4s;
-}
-.dialog-enter .dialog-container,
-.dialog-leave-to .dialog-container {
-  transform: scale(0.9);
-}
-.input {
-  display: flex;
-  margin-bottom: 10px;
-}
-.lable {
-  width: 150px;
+.main {
+  background-image: url("https://www.wallpaperbetter.com/wallpaper/555/606/469/sea-sky-beach-2K-wallpaper.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 </style>
