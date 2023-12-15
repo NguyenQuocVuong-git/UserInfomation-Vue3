@@ -1,15 +1,15 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { useStore } from 'vuex';
+import { ref, computed } from "vue";
+import { useStore } from "vuex";
 
 const selectedFriend = ref(null);
-const input = ref('');
+const input = ref("");
 
 const store = useStore();
 
 const isYourMessage = (message) => {
   return message.from === user.value.socketId;
-}
+};
 
 const send = () => {
   if (!input.value.length) return;
@@ -28,17 +28,20 @@ const user = computed(() => {
 
 const friends = computed(() => store.getters.friends);
 
-const  setId = (value) => {
- selectedFriend.value = value
-}
+const setId = (value) => {
+  selectedFriend.value = value;
+};
 
 const messages = computed(() => {
   if (!selectedFriend.value) return;
   const friendSocketId = selectedFriend.value;
   return store.getters.messagesWithFriend(friendSocketId);
-})
-
-
+});
+</script>
+<script>
+export default {
+  name: "LoginUser",
+};
 </script>
 <template>
   <v-main>
@@ -51,14 +54,21 @@ const messages = computed(() => {
           <v-row class="friends-box">
             <v-col cols="12">
               <v-list dense class="friends_list">
-                <v-list-item-group v-model="selectedFriend" >
-                  <v-list-item @click="setId(friend.socketId)"  v-for="(friend, index) in friends" :key="friend.socketId" :value="friend"
-                    class="friend-info">
+                <v-list-item-group v-model="selectedFriend">
+                  <v-list-item
+                    @click="setId(friend.socketId)"
+                    v-for="(friend, index) in friends"
+                    :key="friend.socketId"
+                    :value="friend"
+                    class="friend-info"
+                  >
                     <v-list-item-icon>
                       <v-icon v-text="index"></v-icon>
                     </v-list-item-icon>
                     <v-list-item-content>
-                      <v-list-item-title v-text="friend.username"></v-list-item-title>
+                      <v-list-item-title
+                        v-text="friend.username"
+                      ></v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
                 </v-list-item-group>
@@ -68,29 +78,43 @@ const messages = computed(() => {
         </v-col>
         <v-col class="d-flex flex-column right-box" cols="8">
           <div class="message-box">
-            <div :class="{ message: true }" v-for="message in messages" :key="message.socketId">
-              <span :class="{
-                'message-text': true,
-                'user-message-text': isYourMessage(message),
-              }">
+            <div
+              :class="{ message: true }"
+              v-for="message in messages"
+              :key="message.socketId"
+            >
+              <span
+                :class="{
+                  'message-text': true,
+                  'user-message-text': isYourMessage(message),
+                }"
+              >
                 {{ message.content }}
               </span>
             </div>
           </div>
           <div class="message-box">
-            <v-form @submit.prevent="send" class="d-flex flex-row align-center chat-box">
-              <v-text-field label="Message" placeholder="Message" solo hide-details="auto" v-model="input"></v-text-field>
-              <v-btn type="submit" class="chat-box__button-send" large>Send</v-btn>
+            <v-form
+              @submit.prevent="send"
+              class="d-flex flex-row align-center chat-box"
+            >
+              <v-text-field
+                label="Message"
+                placeholder="Message"
+                solo
+                hide-details="auto"
+                v-model="input"
+              ></v-text-field>
+              <v-btn type="submit" class="chat-box__button-send" large
+                >Send</v-btn
+              >
             </v-form>
           </div>
-
         </v-col>
       </v-row>
     </v-container>
   </v-main>
 </template>
-
-
 
 <style scoped>
 main {
@@ -127,7 +151,7 @@ main {
   margin-bottom: 10px;
 }
 
-.friends-box>.col {
+.friends-box > .col {
   padding-top: 0;
   padding-bottom: 0;
 }
