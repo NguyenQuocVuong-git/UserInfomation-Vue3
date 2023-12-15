@@ -20,14 +20,14 @@
           <td>{{ person.email }}</td>
           <td>{{ person.phone }}</td>
           <td>
-            <!-- <button
+            <button
               @click="
                 show = !show;
                 iform = person;
               "
             >
               Update
-            </button> -->
+            </button>
             <button>
               <a
                 href="javascript:;"
@@ -37,7 +37,7 @@
             </button>
           </td>
         </tr>
-        <!-- <UpdateUser v-model:active="show" :data-edit="iform" /> -->
+        <UpdateUser v-model:active="show" :data-edit="iform" />
       </tbody>
       <div class="modal-container" v-if="confirmDelete">
         <div class="modal-body">
