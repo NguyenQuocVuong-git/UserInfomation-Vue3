@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
+import axios from "@/axios";
 
 const selectedFriend = ref(null);
 const input = ref("");
@@ -16,27 +17,57 @@ const send = () => {
   const message = {
     content: input.value,
     to: selectedFriend.value,
-    from: user.value.socketId,
+    from: localStorage.getItem('id'),
   };
-  store.dispatch("SEND_MESSAGE", message);
+  store.dispatch("SEND_MESSAGEV2", message);
   input.value = "";
 };
+
+const people = ref([]);
+
+const getAll = () => {
+  axios.get("user/getAllUser").then((res) => {
+    people.value = res.data.allUser;
+  });
+};
+getAll()
 
 const user = computed(() => {
   return store.getters.user;
 });
 
-const friends = computed(() => store.getters.friends);
+// const friends = computed(() => store.getters.friends);
 
 const setId = (value) => {
   selectedFriend.value = value;
 };
 
-const messages = computed(() => {
-  if (!selectedFriend.value) return;
-  const friendSocketId = selectedFriend.value;
-  return store.getters.messagesWithFriend(friendSocketId);
+
+
+const loadHistoryChat = async () => {
+  axios.post("chat/history", {
+    idUser1: localStorage.getItem('id'),
+    idUser2: selectedFriend.value
+  })
+    .then((res) => {
+      store.dispatch("LOAD_MESSAGE_CURRENT", res.data.records);
+    });
+}
+
+loadHistoryChat();
+const messageHistory = computed(() => {
+  loadHistoryChat()
+  return store.getters.messageWithFriendV2;
 });
+
+
+// const messages = computed(() => {
+//   if (!selectedFriend.value) return;
+//   loadHistoryChat()
+//   const friendSocketId = selectedFriend.value;
+//   return store.getters.messagesWithFriend(friendSocketId);
+// });
+
 </script>
 <script>
 export default {
@@ -55,20 +86,13 @@ export default {
             <v-col cols="12">
               <v-list dense class="friends_list">
                 <v-list-item-group v-model="selectedFriend">
-                  <v-list-item
-                    @click="setId(friend.socketId)"
-                    v-for="(friend, index) in friends"
-                    :key="friend.socketId"
-                    :value="friend"
-                    class="friend-info"
-                  >
+                  <v-list-item @click="setId(friend._id)" v-for="(friend, index) in people" :key="friend._id"
+                    :value="friend" class="friend-info">
                     <v-list-item-icon>
                       <v-icon v-text="index"></v-icon>
                     </v-list-item-icon>
                     <v-list-item-content>
-                      <v-list-item-title
-                        v-text="friend.username"
-                      ></v-list-item-title>
+                      <v-list-item-title v-text="friend.name"></v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
                 </v-list-item-group>
@@ -78,36 +102,19 @@ export default {
         </v-col>
         <v-col class="d-flex flex-column right-box" cols="8">
           <div class="message-box">
-            <div
-              :class="{ message: true }"
-              v-for="message in messages"
-              :key="message.socketId"
-            >
-              <span
-                :class="{
-                  'message-text': true,
-                  'user-message-text': isYourMessage(message),
-                }"
-              >
+            <div :class="{ message: true }" v-for="message in messageHistory" :key="message._id">
+              <span :class="{
+                'message-text': true,
+                'user-message-text': isYourMessage(message),
+              }">
                 {{ message.content }}
               </span>
             </div>
           </div>
           <div class="message-box">
-            <v-form
-              @submit.prevent="send"
-              class="d-flex flex-row align-center chat-box"
-            >
-              <v-text-field
-                label="Message"
-                placeholder="Message"
-                solo
-                hide-details="auto"
-                v-model="input"
-              ></v-text-field>
-              <v-btn type="submit" class="chat-box__button-send" large
-                >Send</v-btn
-              >
+            <v-form @submit.prevent="send" class="d-flex flex-row align-center chat-box">
+              <v-text-field label="Message" placeholder="Message" solo hide-details="auto" v-model="input"></v-text-field>
+              <v-btn type="submit" class="chat-box__button-send" large>Send</v-btn>
             </v-form>
           </div>
         </v-col>
@@ -151,7 +158,7 @@ main {
   margin-bottom: 10px;
 }
 
-.friends-box > .col {
+.friends-box>.col {
   padding-top: 0;
   padding-bottom: 0;
 }

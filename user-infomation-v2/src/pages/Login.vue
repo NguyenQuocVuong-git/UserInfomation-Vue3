@@ -30,7 +30,8 @@ const login = async () => {
       store.dispatch("LOGIN", res.data.userLogin)
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", res.data.userLogin);
-      socket.auth = { username: res.data.userLogin.email };
+      localStorage.setItem("id", res.data.userLogin._id);
+      socket.auth = { username: res.data.userLogin.email, id: res.data.userLogin._id };
       socket.connect();
       return router.replace(route.query.to ? String(route.query.to) : "/");
     })
