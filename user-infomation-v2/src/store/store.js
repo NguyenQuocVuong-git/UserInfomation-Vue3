@@ -7,6 +7,7 @@ const store = createStore({
   state: {
     user: null,
     friends: [],
+    messageWithFriendV2 : []
   },
   mutations: {
     setUser(state, user) {
@@ -28,6 +29,9 @@ const store = createStore({
       friends[receiverIndex].messages = messages;
       state.friends = friends;
     },
+    addNewMessageV2(state, message){
+      state.messageWithFriendV2.push(message)
+    },
     receiveMessage(state, message) {
       const friends = [...state.friends];
       const senderIndex = friends.findIndex(
@@ -38,6 +42,9 @@ const store = createStore({
       friends[senderIndex].messages = messages;
       state.friends = friends;
     },
+    loadMessage(state, messages ) {
+      state.messageWithFriendV2 = messages ;
+    }
   },
   actions: {
     LOGIN({ commit }, user) {
@@ -51,10 +58,17 @@ const store = createStore({
     },
     SEND_MESSAGE({ commit }, message) {
       socket.emit("PRIVATE_MESSAGE", message);
-      commit("addNewMessage", message);
+      commit("addNewMessageV2", message);
     },
     RECEIVE_MESSAGE({ commit }, message) {
       commit("receiveMessage", message);
+    },
+    LOAD_MESSAGE_CURRENT({commit}, messages) {
+      commit("loadMessage", messages);
+    },
+    SEND_MESSAGEV2({ commit }, message) {
+      socket.emit("PRIVATE_MESSAGE", message);
+      commit("addNewMessage", message);
     },
   },
   getters: {
@@ -63,6 +77,9 @@ const store = createStore({
     },
     friends(state) {
       return state.friends;
+    },
+    messageWithFriendV2(state) {
+      return state.messageWithFriendV2;
     },
     messagesWithFriend(state) {
       return (socketId) => {
@@ -76,6 +93,7 @@ const store = createStore({
       };
     },
   },
+  
 });
 
 export default store;
