@@ -93,12 +93,10 @@ const deleteUser = async () => {
     });
 };
 </script>
+  
 <script>
 export default {
   name: 'TableUser',
-  props: {
-    msg: String
-  }
 }
 </script>
 <style>

@@ -1,14 +1,10 @@
 <template>
-  <v-app>
-    <router-view>
-    </router-view>
-  </v-app>
+  <router-view />
 </template>
-<script>
 
+<script>
 export default {
-  name: 'App',
-  data: () => ({
-  }),
-}
+  name: "App",
+  components: {},
+};
 </script>
