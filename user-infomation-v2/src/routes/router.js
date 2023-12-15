@@ -1,8 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import Login from '../pages/Login.vue';
-import Home from '../pages/Home.vue';
-import store from '@/store/store';
-
+import { createRouter, createWebHistory } from "vue-router";
+import Login from "../pages/Login.vue";
+import Home from "../pages/Home.vue";
+// import store from "@/store/store";
+import UserInformation from "../components/UserInformation.vue"
 const routes = [
   {
     name: "Home",
@@ -14,6 +14,11 @@ const routes = [
     path: "/login",
     component: Login,
   },
+  {
+    name: "user",
+    path: "/user",
+    component: UserInformation,
+  },
 ];
 
 const router = createRouter({
@@ -21,10 +26,10 @@ const router = createRouter({
   routes: routes,
 });
 
-router.beforeEach((to, from, next) => {
-  if (to.name !== "Login" && !store.state.user) next({ name: "Login" });
-  else if (to.name === "Login" && store.state.user) next({ name: "Home" });
-  else next();
-});
+// router.beforeEach((to, from, next) => {
+//   if (to.name !== "Login" && !store.state.user) next({ name: "Login" });
+//   else if (to.name === "Login" && store.state.user) next({ name: "Home" });
+//   else next();
+// });
 
 export default router;

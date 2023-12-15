@@ -1,4 +1,7 @@
 <template>
+  <div>
+    <h3 v-if="statusDelete" style="color: red">{{ statusDeleteValue }}</h3>
+  </div>
   <div class="table-wrapper">
     <table class="table">
       <thead>
@@ -28,7 +31,7 @@
             <button>
               <a
                 href="javascript:;"
-                v-on:click="deleteUser(person.email, index)"
+                v-on:click="(confirmDelete = true), (id = person._id)"
                 >Delete</a
               >
             </button>
@@ -36,6 +39,18 @@
         </tr>
         <!-- <UpdateUser v-model:active="show" :data-edit="iform" /> -->
       </tbody>
+      <div class="modal-container" v-if="confirmDelete">
+        <div class="modal-body">
+          <span class="modal-close" @click="confirmDelete = false">🗙</span>
+          <h2>Do you really want to delete?</h2>
+          <div class="modal-action">
+            <button class="modal-button" @click="deleteUser()">Yes</button>
+            <button class="modal-button" @click="confirmDelete = false">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
     </table>
   </div>
 </template>
@@ -43,46 +58,39 @@
 <script setup>
 import { ref } from "vue";
 import axios from "@/axios";
-// import UpdateUser from "@/diaglog/UpdateUser.vue";
-// const show = ref(false);
-// const iform = ref();
-const people = ref([
-  {
-    name: "John Doe",
-    age: 30,
-    email: "mailto:john@example.com",
-    phone: "123-456-7890",
-  },
-  {
-    name: "Jane Smith",
-    age: 25,
-    email: "mailto:jane@example.com",
-    phone: "987-654-3210",
-  },
-]);
+import UpdateUser from "@/components/UpdateUser.vue";
+const show = ref(false);
+const iform = ref();
+const people = ref([]);
+const confirmDelete = ref(false);
+const statusDeleteValue = ref();
+const statusDelete = ref(false);
+
+const id = ref();
 const getAll = () => {
   axios.get("user/getAllUser").then((res) => {
     people.value = res.data.allUser;
   });
 };
 getAll();
-const deleteUser = async (email, index) => {
-  if (confirm("Do you really want to delete?")) {
-    await axios
-      .get("user/deleteUser")
-      .then(() => {
-        if (index > -1) {
-          people.value.splice(index, 1);
-        }
-        alert("Account Delete Succsess.");
-      })
-      .catch((err) => {
-        if (index > -1) {
-          people.value.splice(index, 1);
-        }
-        alert(err);
-      });
-  }
+const deleteUser = async () => {
+  confirmDelete.value = false;
+  statusDelete.value = true;
+  await axios
+    .delete(`user/deleteUser/${id.value}`)
+    .then(() => {
+      statusDeleteValue.value = "Delete account success";
+      setTimeout(() => {
+        statusDelete.value = false;
+      }, 3000);
+      getAll();
+    })
+    .catch(() => {
+      statusDeleteValue.value = "Delete account unsuccess";
+      setTimeout(() => {
+        statusDelete.value = false;
+      }, 3000);
+    });
 };
 </script>
   
@@ -105,5 +113,49 @@ export default {
 .table td {
   border: 1px solid black;
   padding: 8px;
+}
+.modal-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #cececeb5;
+}
+.modal-body {
+  background-color: #fff;
+  border: 2px solid #74a2cf;
+  border-radius: 10px;
+  text-align: center;
+  padding: 20px 40px;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+}
+.modal-action {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  justify-content: center;
+}
+.modal-button {
+  cursor: pointer;
+  height: 30px;
+  padding: 0 25px;
+  border: 2px solid #74a2cf;
+  border-radius: 5px;
+  background-color: #80b2e4;
+  color: #fff;
+}
+.modal-close {
+  cursor: pointer;
+  position: relative;
+  align-self: end;
+  right: -33px;
+  top: -17px;
 }
 </style>
