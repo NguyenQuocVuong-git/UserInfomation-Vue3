@@ -58,6 +58,7 @@ watch(props, () => {
 
 const updateUser = () => {
   statusEdit.value = true;
+  console.log(form.value._id)
   axios
     .put("user/updateUser", {
       name: form.value.name,
