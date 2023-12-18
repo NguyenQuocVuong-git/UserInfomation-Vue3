@@ -4,16 +4,9 @@
     <TableUser/>
   </div>
 </template>
-<script>
+<script setup>
 import HeaderUser from "./Header.vue";
 import TableUser from "./Table.vue";
-export default {
-  name: "UserInformation",
-  components: {
-    HeaderUser,
-    TableUser,
-  },
-};
 </script>
 <style>
 #app {

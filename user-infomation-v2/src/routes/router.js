@@ -1,11 +1,14 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "../pages/Login.vue";
 import Home from "../pages/Home.vue";
-import store from "@/store/store";
-import { jwtDecode } from "jwt-decode";
+import UserInformation from "../components/UserInformation.vue";
+import CreateAccount from "../components/Create.vue";
+import About from "../pages/About.vue";
+import NotFound from "../pages/NotFound.vue";
+import axios from "@/axios";
 const routes = [
   {
-    name: "Home",
+    name: "home",
     path: "/",
     component: Home,
   },
@@ -17,13 +20,19 @@ const routes = [
   {
     name: "user",
     path: "/user",
-    component: () => import("../components/UserInformation.vue"),
+    component: UserInformation,
   },
   {
     path: "/create-account",
     name: "createAccount",
-    component: () => import("../components/Create.vue"),
+    component: CreateAccount,
   },
+  {
+    path: "/about",
+    name: "about",
+    component: About,
+  },
+  { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
 ];
 
 const router = createRouter({
@@ -32,24 +41,28 @@ const router = createRouter({
 });
 
 const routerNext = (name) => {
-  let keysToRemove = ["createAccount"];
+  let keysToRemove = ["createAccount", "about"];
   const found = keysToRemove.find((element) => element === name);
   if (found) return true;
   return false;
 };
 
-router.beforeEach((to, from, next) => {
-  const checkUserInState = !store.state.user ? false : true;
-  const token = localStorage.getItem("token");
-  const userIsLogin = token
-    ? jwtDecode(token).exp * 1000 - new Date().valueOf() > 0
-      ? checkUserInState
-      : false
-    : false;
+router.beforeEach(async (to, from, next) => {
   if (routerNext(to.name)) next();
-  else if (to.name !== "login" && !userIsLogin) next({ name: "login" });
-  else if (to.name === "login" && userIsLogin) next({ name: "home" });
-  else next();
+  else {
+    const _id = localStorage.getItem("id");
+    const token = localStorage.getItem("token");
+    await axios
+      .post("user/checkToken", { token, _id })
+      .then(() => {
+        if (to.name === "login") next({ name: "home" });
+        else next();
+      })
+      .catch(() => {
+        if (to.name !== "login") return router.replace("/login");
+        else next();
+      });
+  }
 });
 
 export default router;
