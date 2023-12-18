@@ -2,10 +2,12 @@
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import axios from "@/axios";
-
+import { useRoute, useRouter } from "vue-router";
+const route = useRoute();
+const router = useRouter();
 const selectedFriend = ref(null);
 const input = ref("");
-
+const userLogin = JSON.parse(localStorage.getItem("user"));
 const store = useStore();
 
 const isYourMessage = (message) => {
@@ -17,7 +19,7 @@ const send = () => {
   const message = {
     content: input.value,
     to: selectedFriend.value,
-    from: localStorage.getItem('id'),
+    from: localStorage.getItem("id"),
   };
   store.dispatch("SEND_MESSAGEV2", message);
   input.value = "";
@@ -30,7 +32,7 @@ const getAll = () => {
     people.value = res.data.allUser.filter(item => item._id != localStorage.getItem('id'));
   });
 };
-getAll()
+getAll();
 
 // const user = computed(() => {
 //   return store.getters.user;
@@ -42,24 +44,22 @@ const setId = (value) => {
   selectedFriend.value = value;
 };
 
-
-
 const loadHistoryChat = async () => {
-  axios.post("chat/history", {
-    idUser1: localStorage.getItem('id'),
-    idUser2: selectedFriend.value
-  })
+  axios
+    .post("chat/history", {
+      idUser1: localStorage.getItem("id"),
+      idUser2: selectedFriend.value,
+    })
     .then((res) => {
       store.dispatch("LOAD_MESSAGE_CURRENT", res.data.records);
     });
-}
+};
 
 loadHistoryChat();
 const messageHistory = computed(() => {
-  loadHistoryChat()
+  loadHistoryChat();
   return store.getters.messageWithFriendV2;
 });
-
 
 // const messages = computed(() => {
 //   if (!selectedFriend.value) return;
@@ -67,11 +67,20 @@ const messageHistory = computed(() => {
 //   const friendSocketId = selectedFriend.value;
 //   return store.getters.messagesWithFriend(friendSocketId);
 // });
-
-</script>
-<script>
-export default {
-  name: "LoginUser",
+const logout = async () => {
+  await axios
+    .post("user/logout", {
+      _id: userLogin._id,
+      token: localStorage.getItem("token"),
+    })
+    .then(() => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("id");
+      return router.replace(route.query.to ? String(route.query.to) : "/login");
+    }).catch((err)=>{
+      console.log(err)
+    })
 };
 </script>
 <template>
@@ -80,19 +89,34 @@ export default {
       <v-row class="home-screen__row">
         <v-col class="d-flex flex-column left-box" cols="4">
           <div>
-            <h2 class="title">Friends</h2>
+            <div>
+              <h3 class="titlelgout">
+                Hi {{ userLogin.name }},
+                <button class="Logout" @click="logout()">Logout</button>
+              </h3>
+            </div>
+            <div style="padding-top: 0">
+              <h2 class="title">Friends</h2>
+            </div>
           </div>
           <v-row class="friends-box">
             <v-col cols="12">
               <v-list dense class="friends_list">
                 <v-list-item-group v-model="selectedFriend">
-                  <v-list-item @click="setId(friend._id)" v-for="(friend, index) in people" :key="friend._id"
-                    :value="friend" class="friend-info">
+                  <v-list-item
+                    @click="setId(friend._id)"
+                    v-for="(friend, index) in people"
+                    :key="friend._id"
+                    :value="friend"
+                    class="friend-info"
+                  >
                     <v-list-item-icon>
                       <v-icon v-text="index"></v-icon>
                     </v-list-item-icon>
                     <v-list-item-content>
-                      <v-list-item-title v-text="friend.name"></v-list-item-title>
+                      <v-list-item-title
+                        v-text="friend.name"
+                      ></v-list-item-title>
                     </v-list-item-content>
                   </v-list-item>
                 </v-list-item-group>
@@ -102,19 +126,36 @@ export default {
         </v-col>
         <v-col class="d-flex flex-column right-box" cols="8">
           <div class="message-box">
-            <div :class="{ message: true }" v-for="message in messageHistory" :key="message._id">
-              <span :class="{
-                'message-text': true,
-                'user-message-text': isYourMessage(message),
-              }">
+            <div
+              :class="{ message: true }"
+              v-for="message in messageHistory"
+              :key="message._id"
+            >
+              <span
+                :class="{
+                  'message-text': true,
+                  'user-message-text': isYourMessage(message),
+                }"
+              >
                 {{ message.content }}
               </span>
             </div>
           </div>
           <div class="message-box">
-            <v-form @submit.prevent="send" class="d-flex flex-row align-center chat-box">
-              <v-text-field label="Message" placeholder="Message" solo hide-details="auto" v-model="input"></v-text-field>
-              <v-btn type="submit" class="chat-box__button-send" large>Send</v-btn>
+            <v-form
+              @submit.prevent="send"
+              class="d-flex flex-row align-center chat-box"
+            >
+              <v-text-field
+                label="Message"
+                placeholder="Message"
+                solo
+                hide-details="auto"
+                v-model="input"
+              ></v-text-field>
+              <v-btn type="submit" class="chat-box__button-send" large
+                >Send</v-btn
+              >
             </v-form>
           </div>
         </v-col>
@@ -158,7 +199,7 @@ main {
   margin-bottom: 10px;
 }
 
-.friends-box>.col {
+.friends-box > .col {
   padding-top: 0;
   padding-bottom: 0;
 }
@@ -204,5 +245,26 @@ main {
 .user-message-text {
   background-color: #2980b9 !important;
   margin-left: auto;
+}
+.titlelgout {
+  height: 30px;
+  color: rgb(85, 70, 150);
+}
+.Logout {
+  color: rgb(104, 85, 224);
+  background-color: rgba(255, 255, 255, 1);
+  cursor: pointer;
+  border-radius: 4px;
+  font-weight: 600;
+  margin: 0 10px;
+  width: 70px;
+  padding: 0px 0;
+  box-shadow: 0 0 20px rgba(104, 85, 224, 0.2);
+  transition: 0.4s;
+}
+.Logout:hover {
+  color: white;
+  box-shadow: 0 0 20px rgba(104, 85, 224, 0.6);
+  background-color: rgba(104, 85, 224, 1);
 }
 </style>

@@ -28,7 +28,7 @@ const login = async () => {
     .then((res) => {
       store.dispatch("LOGIN", res.data.userLogin);
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", res.data.userLogin);
+      localStorage.setItem("user", JSON.stringify(res.data.userLogin));
       localStorage.setItem("id", res.data.userLogin._id);
       socket.auth = { username: res.data.userLogin.email, id: res.data.userLogin._id };
       socket.connect();
