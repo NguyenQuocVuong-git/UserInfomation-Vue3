@@ -58,7 +58,7 @@ const store = createStore({
     },
     SEND_MESSAGE({ commit }, message) {
       socket.emit("PRIVATE_MESSAGE", message);
-      commit("addNewMessageV2", message);
+      commit("addNewMessage", message);
     },
     RECEIVE_MESSAGE({ commit }, message) {
       commit("receiveMessage", message);
@@ -68,7 +68,7 @@ const store = createStore({
     },
     SEND_MESSAGEV2({ commit }, message) {
       socket.emit("PRIVATE_MESSAGE", message);
-      commit("addNewMessage", message);
+      commit("addNewMessageV2", message);
     },
   },
   getters: {
