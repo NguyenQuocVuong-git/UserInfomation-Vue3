@@ -9,7 +9,7 @@ const input = ref("");
 const store = useStore();
 
 const isYourMessage = (message) => {
-  return message.from === user.value.socketId;
+  return message.sendBy ===  localStorage.getItem('id');
 };
 
 const send = () => {
@@ -27,14 +27,14 @@ const people = ref([]);
 
 const getAll = () => {
   axios.get("user/getAllUser").then((res) => {
-    people.value = res.data.allUser;
+    people.value = res.data.allUser.filter(item => item._id != localStorage.getItem('id'));
   });
 };
 getAll()
 
-const user = computed(() => {
-  return store.getters.user;
-});
+// const user = computed(() => {
+//   return store.getters.user;
+// });
 
 // const friends = computed(() => store.getters.friends);
 
