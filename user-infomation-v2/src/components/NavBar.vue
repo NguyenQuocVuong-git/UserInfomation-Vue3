@@ -10,7 +10,6 @@
 import { useRouter } from "vue-router";
 const router = useRouter();
 const redirectPage = async (screen) => {
-  console.log("🚀 ~ file: NavBar.vue:13 ~ redirectPage ~ screen:", screen);
   await router.replace(`${screen}`);
 };
 </script>
