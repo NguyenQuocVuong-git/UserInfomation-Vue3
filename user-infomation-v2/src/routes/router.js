@@ -41,18 +41,18 @@ const router = createRouter({
 });
 
 const routerNext = (name) => {
-  let keysToRemove = ["createAccount", "about"];
+  let keysToRemove = ["createAccount"];
   const found = keysToRemove.find((element) => element === name);
   if (found) return true;
   return false;
 };
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach((to, from, next) => {
   if (routerNext(to.name)) next();
   else {
     const _id = localStorage.getItem("id");
     const token = localStorage.getItem("token");
-    await axios
+    axios
       .post("user/checkToken", { token, _id })
       .then(() => {
         if (to.name === "login") next({ name: "home" });
